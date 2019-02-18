@@ -1,0 +1,206 @@
+import hypermedia.net.*;
+import processing.serial.*;
+import processing.sound.*;
+
+Serial myPort;  // The serial port
+
+
+void setup() {
+  // set initial size
+  size(600, 600);
+  // load callouts
+  ra2500 = new SoundFile(this, "2500ft.wav");
+  ra1000 = new SoundFile(this, "1000ft.wav");
+  ra500 = new SoundFile(this, "500ft.wav");
+  ra400 = new SoundFile(this, "400ft.wav");
+  ra300 = new SoundFile(this, "300ft.wav");
+  ra200 = new SoundFile(this, "200ft.wav");
+  ra100 = new SoundFile(this, "100ft.wav");
+  ra50 = new SoundFile(this, "50ft.wav");
+  ra40 = new SoundFile(this, "40ft.wav");
+  ra30 = new SoundFile(this, "30ft.wav");
+  ra20 = new SoundFile(this, "20ft.wav");
+  ra10 = new SoundFile(this, "10ft.wav");
+  mini = new SoundFile(this, "mini.wav");
+  appMini = new SoundFile(this, "app mini.wav");
+
+  // List all the available serial ports:
+  printArray(Serial.list());
+  // Open the port you are using at the rate you want:
+  myPort = new Serial(this, Serial.list()[0], 115200);
+}
+
+// declarations
+int radius = 200;
+float val = 3000;
+float valPrev;
+float valr;
+float minimumsFeet = 200;
+float minimums = minimumsFeet / 1000 * 360;
+SoundFile ra2500;
+SoundFile ra1000;
+SoundFile ra500;
+SoundFile ra400;
+SoundFile ra300;
+SoundFile ra200;
+SoundFile ra100;
+SoundFile ra50;
+SoundFile ra40;
+SoundFile ra30;
+SoundFile ra20;
+SoundFile ra10;
+SoundFile mini;
+SoundFile appMini;
+int ra;
+String data;
+String rawData = "";
+
+void draw() {
+  background(0);
+
+  while (myPort.available () > 0) {
+    String inBuffer = myPort.readString();   
+    if (inBuffer != null) {
+      data = inBuffer;
+      //println(data);
+    }
+  }
+  if (data != null) {
+    for (int j = 1; j < data.length(); j++) {
+      
+      if (str(data.charAt(j)).equals(",")) {
+        val = int(rawData);
+        rawData = "";
+      } else {
+        rawData += data.charAt(j);
+      }
+    }
+  }
+
+  // get the value for the previous value
+  valPrev = val;
+
+  //val = 600 - frameCount * 0.25;
+  //if (val >= 2500) {
+  //  val = 2500;
+  //}
+
+
+  valr = radians((val / 1000) * 360);
+  // draw the base circle of the dial
+  noFill();
+  stroke(255);
+
+  strokeWeight(3);
+
+
+  if (val <= 1000) {
+
+    strokeWeight(2);
+    if ((val <= minimumsFeet) && (val > 0)) {
+      fill(#FFAD08);
+    } else {
+      fill(255);
+    }
+    //stroke(255);
+    if ((val < minimumsFeet) && (val > 0)) {
+      if (frameCount % 20 < 10) {
+        stroke(#FFAD08);
+      } else {
+        stroke(0);
+      }
+    }
+    noFill();
+    arc(300, 300, 80, 80, -PI/2, valr - PI/2);
+    for (int i = -90; i < 270; i+=36) {
+      line(39*cos(radians(i)) + 300, 39*sin(radians(i)) + 300, 36*cos(radians(i)) + 300, 36*sin(radians(i)) + 300);
+    }
+
+    // draw minimums
+    stroke(#00CE16);
+    line(39*cos(radians(minimums - 90)) + 300, 39*sin(radians(minimums - 90)) + 300, 32*cos(radians(minimums - 90)) + 300, 32*sin(radians(minimums - 90)) + 300);
+  }
+
+  fill(255);
+  // text indicator
+  textSize(30);
+  text(int(val), 300 - str(int(val)).length() * 10, 309);
+
+  // determining RA callout
+
+  if ((val <= 2500) && (valPrev > 2500)) {
+    ra = 2500;
+  }
+  if ((val <= 1000) && (valPrev > 1000)) {
+    ra = 1000;
+  }
+  for (int i = 500; i >= 100; i -= 100) {
+    if ((val <= i) && (valPrev > i)) {
+      ra = i;
+    }
+  }
+  for (int i = 50; i >= 10; i -= 10) {
+    if ((val <= i) && (valPrev > i)) {
+      ra = i;
+    }
+  }
+  // ra for minimums
+  if ((val <= minimumsFeet) && (valPrev > minimumsFeet)) {
+    ra = int(minimumsFeet);
+  }
+  if ((val <= minimumsFeet + 100) && (valPrev > minimumsFeet + 100)) {
+    ra = int(minimumsFeet + 100);
+  }
+  
+  
+  // sound
+  if (ra == int(minimumsFeet)) {
+    mini.play();
+  } else if (ra == int(minimumsFeet) + 100) {
+
+    appMini.play();
+  } else {
+    println(ra);
+    switch(ra) {
+    case 2500:
+      ra2500.play();
+      break;
+    case 1000:
+      ra1000.play();
+      break;
+    case 500:
+      ra500.play();
+      break;
+    case 400:
+      ra400.play();
+      break;
+    case 300:
+      ra300.play();
+      break;
+    case 200:
+      ra200.play();
+      break;
+    case 100:
+      ra100.play();
+      break;
+    case 50:
+      ra50.play();
+      break;
+    case 40:
+      ra40.play();
+      break;
+    case 30:
+      ra30.play();
+      break;
+    case 20:
+      ra20.play();
+      break;
+    case 10:
+      ra10.play();
+      break;
+    }
+  }
+
+  // reset ra
+  ra = 0;
+}

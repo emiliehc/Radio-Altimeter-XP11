@@ -1,0 +1,60 @@
+import processing.serial.*;
+
+void setup() {
+  // set initial size
+  size(600, 600);
+}
+
+// declarations
+int radius = 200;
+float val;
+float valr;
+float minimumsFeet = 200;
+float minimums = minimumsFeet / 1000 * 360;
+
+void draw() {
+  background(0);
+  val = 2500 - frameCount * 1;
+  if (val >= 2500) {
+    val = 2500;
+  }
+  valr = radians((val / 1000) * 360);
+  // draw the base circle of the dial
+  noFill();
+  stroke(255);
+
+  strokeWeight(3);
+
+
+  if (val <= 1000) {
+
+    strokeWeight(2);
+    if ((val <= minimumsFeet) && (val > 0)) {
+      fill(#FFAD08);
+    } else {
+      fill(255);
+    }
+    //stroke(255);
+    if ((val < minimumsFeet) && (val > 0)) {
+      if (frameCount % 20 < 10) {
+        stroke(#FFAD08);
+      } else {
+        stroke(0);
+      }
+    }
+    noFill();
+    arc(300, 300, 80, 80, -PI/2, valr - PI/2);
+    for (int i = -90; i < 270; i+=36) {
+      line(40*cos(radians(i)) + 300, 40*sin(radians(i)) + 300, 36*cos(radians(i)) + 300, 36*sin(radians(i)) + 300);
+    }
+
+    // draw minimums
+    stroke(#00CE16);
+    line(38*cos(radians(minimums - 90)) + 300, 38*sin(radians(minimums - 90)) + 300, 32*cos(radians(minimums - 90)) + 300, 32*sin(radians(minimums - 90)) + 300);
+  }
+
+  fill(255);
+  // text indicator
+  textSize(30);
+  text(int(val), 300 - str(int(val)).length() * 10, 309);
+}
